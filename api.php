@@ -33,7 +33,12 @@ function createTurkey() {
     $data = json_decode(file_get_contents('php://input'), true);
     if (isset($data['name'], $data['weight'], $data['age'], $data['status'], $data['color'])) {
         $turkey = new Turkey();
-        $result = $turkey->createTurkey($data['name'], $data['weight'], $data['age'], $data['status'], $data['color']);
+        $turkey->name = $data['name'];
+        $turkey->weight = $data['weight'];
+        $turkey->age = $data['age'];
+        $turkey->status = $data['status'];
+        $turkey->color = $data['color'];
+        $result = $turkey->save();
         echo json_encode(['success' => $result]);
     } else {
         echo json_encode(['error' => 'Invalid input']);
@@ -43,8 +48,13 @@ function createTurkey() {
 function editTurkey() {
     $data = json_decode(file_get_contents('php://input'), true);
     if (isset($data['id'], $data['name'], $data['weight'], $data['age'], $data['status'], $data['color'])) {
-        $turkey = new Turkey();
-        $result = $turkey->editTurkey($data['id'], $data['name'], $data['weight'], $data['age'], $data['status'], $data['color']);
+        $turkey = new Turkey($data['id']);
+        $turkey->name = $data['name'];
+        $turkey->weight = $data['weight'];
+        $turkey->age = $data['age'];
+        $turkey->status = $data['status'];
+        $turkey->color = $data['color'];
+        $result = $turkey->save();
         echo json_encode(['success' => $result]);
     } else {
         echo json_encode(['error' => 'Invalid input']);
