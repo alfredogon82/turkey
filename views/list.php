@@ -11,8 +11,11 @@
     <div class="container mt-5">
         <h1 class="display-4 text-center">Alfredo González - Turkey Challenge</h1>
         <div class="d-flex justify-content-between mb-3">
-            <button class="btn btn-primary">Report</button>
+            <button class="btn btn-primary" id="exportCSV">Export to CSV</button>
             <button id="add_turkey" class="btn btn-success">Add Turkey</button>
+        </div>
+        <div class="mb-3">
+            <input type="text" id="searchInput" class="form-control" placeholder="Search turkeys...">
         </div>
         <div id="warning" class="alert alert-warning d-none" role="alert">
             Connection to the database is not working.
@@ -239,14 +242,18 @@
                             fetch('api.php?action=getTurkeyById&id=' + id)
                             .then(response => response.json())
                             .then(turkey => {
-                                $('#editTurkeyId').val(turkey.id);
-                                $('#editTurkeyName').val(turkey.name);
-                                $('#editTurkeyWeight').val(turkey.weight);
-                                $('#editTurkeyAge').val(turkey.age);
-                                $('#editTurkeyStatus').val(turkey.status);
-                                $('#editTurkeyColorPicker').val(turkey.color);
-                                $('#editTurkeyColor').val(turkey.color);
-                                $('#editTurkeyModal').modal('show');
+                                if (turkey) {
+                                    $('#editTurkeyId').val(turkey.id);
+                                    $('#editTurkeyName').val(turkey.name);
+                                    $('#editTurkeyWeight').val(turkey.weight);
+                                    $('#editTurkeyAge').val(turkey.age);
+                                    $('#editTurkeyStatus').val(turkey.status);
+                                    $('#editTurkeyColorPicker').val(turkey.color);
+                                    $('#editTurkeyColor').val(turkey.color);
+                                    $('#editTurkeyModal').modal('show');
+                                } else {
+                                    alert('Error fetching turkey information');
+                                }
                             });
                         });
                     }
@@ -254,6 +261,18 @@
                 error: function() {
                     $('#warning').removeClass('d-none');
                 }
+            });
+
+            // Search functionality
+            $('#searchInput').on('keyup', function() {
+                var value = $(this).val().toLowerCase();
+                $('#turkeyTableBody tr').filter(function() {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                });
+            });
+
+            $('#exportCSV').click(function() {
+                window.location.href = 'api.php?action=exportToCSV';
             });
         });
     </script>

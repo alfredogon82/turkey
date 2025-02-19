@@ -1,5 +1,6 @@
 <?php
 require 'classes/Turkey.php';
+require 'classes/TurkeyExport.php';
 
 header('Content-Type: application/json');
 
@@ -17,6 +18,9 @@ switch ($action) {
         break;
     case 'getTurkeyById':
         getTurkeyById();
+        break;
+    case 'exportToCSV':
+        exportToCSV();
         break;
     default:
         echo json_encode(['error' => 'Invalid action']);
@@ -70,5 +74,14 @@ function getTurkeyById() {
     } else {
         echo json_encode(['error' => 'Invalid ID']);
     }
+}
+
+function exportToCSV() {
+    $exporter = new TurkeyExport();
+    $filename = $exporter->exportToCSV();
+    header('Content-Type: text/csv');
+    header('Content-Disposition: attachment; filename="' . $filename . '"');
+    readfile($filename);
+    unlink($filename); // Delete the file after download
 }
 ?>
