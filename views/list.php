@@ -11,9 +11,13 @@
     <div class="container mt-5">
         <h1 class="display-4 text-center">Alfredo González - Turkey Challenge</h1>
         <div class="d-flex justify-content-between mb-3">
-            <form id="exportCSVForm" action="api.php" method="get" style="display: inline;">
+            <form id="exportCSVForm" action="api.php" method="get" target="_blank" style="display: inline;">
                 <input type="hidden" name="action" value="exportToCSV">
                 <button type="submit" class="btn btn-primary">Report</button>
+            </form>
+            <form id="generateSQLReportForm" action="api.php" method="get" target="_blank" style="display: inline;">
+                <input type="hidden" name="action" value="generateSQLReport">
+                <button type="submit" class="btn btn-secondary">SQL Report</button>
             </form>
             <button id="add_turkey" class="btn btn-success">Add Turkey</button>
         </div>

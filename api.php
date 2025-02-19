@@ -13,6 +13,9 @@ switch ($action) {
     case 'exportToCSV':
         exportToCSV();
         break;
+    case 'generateSQLReport':
+        generateSQLReport();
+        break;
     default:
         echo json_encode(['error' => 'Invalid action']);
         break;
@@ -28,6 +31,15 @@ function exportToCSV() {
     $exporter = new TurkeyExport();
     $filename = $exporter->exportToCSV();
     header('Content-Type: text/csv');
+    header('Content-Disposition: attachment; filename="' . $filename . '"');
+    readfile($filename);
+    unlink($filename); // Delete the file after download
+}
+
+function generateSQLReport() {
+    $exporter = new TurkeyExport();
+    $filename = $exporter->generateSQLReport();
+    header('Content-Type: text/plain');
     header('Content-Disposition: attachment; filename="' . $filename . '"');
     readfile($filename);
     unlink($filename); // Delete the file after download
