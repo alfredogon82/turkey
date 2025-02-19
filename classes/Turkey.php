@@ -77,11 +77,5 @@ class Turkey
             $this->created_at = $data['created_at'];
         }
     }
-
-    public function delete($id)
-    {
-        $stmt = $this->conn->prepare("DELETE FROM turkeys WHERE id = ?");
-        return $stmt->execute([$id]);
-    }
 }
 ?>

@@ -11,11 +11,11 @@
     <div class="container mt-5">
         <h1 class="display-4 text-center">Alfredo González - Turkey Challenge</h1>
         <div class="d-flex justify-content-between mb-3">
-            <button class="btn btn-primary" id="exportCSV">Export to CSV</button>
+            <form id="exportCSVForm" action="api.php" method="get" style="display: inline;">
+                <input type="hidden" name="action" value="exportToCSV">
+                <button type="submit" class="btn btn-primary">Report</button>
+            </form>
             <button id="add_turkey" class="btn btn-success">Add Turkey</button>
-        </div>
-        <div class="mb-3">
-            <input type="text" id="searchInput" class="form-control" placeholder="Search turkeys...">
         </div>
         <div id="warning" class="alert alert-warning d-none" role="alert">
             Connection to the database is not working.
@@ -30,6 +30,7 @@
                     <th scope="col">Status</th>
                     <th scope="col">Color</th>
                     <th scope="col">Created At</th>
+                    <th scope="col">Status Image</th>
                 </tr>
             </thead>
             <tbody id="turkeyTableBody">
@@ -49,22 +50,22 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <form id="createTurkeyForm">
+                    <form id="turkeyForm">
                         <div class="form-group">
                             <label for="turkeyName">Name</label>
-                            <input type="text" class="form-control" id="turkeyName" name="name" maxlength="50" required>
+                            <input type="text" class="form-control" id="turkeyName" maxlength="50" required>
                         </div>
                         <div class="form-group">
                             <label for="turkeyWeight">Weight</label>
-                            <input type="number" class="form-control" id="turkeyWeight" name="weight" step="0.01" max="999.99" required>
+                            <input type="number" class="form-control" id="turkeyWeight" step="0.01" max="999.99" required>
                         </div>
                         <div class="form-group">
                             <label for="turkeyAge">Age</label>
-                            <input type="number" class="form-control" id="turkeyAge" name="age" max="999" required>
+                            <input type="number" class="form-control" id="turkeyAge" max="999" required>
                         </div>
                         <div class="form-group">
                             <label for="turkeyStatus">Status</label>
-                            <select class="form-control" id="turkeyStatus" name="status" required>
+                            <select class="form-control" id="turkeyStatus" required>
                             <option value="">Select the turkey status!</option>    
                             <option value="alive">Alive</option>
                                 <option value="cooked">Cooked</option>
@@ -74,53 +75,7 @@
                         <div class="form-group">
                             <label for="turkeyColor">Color</label>
                             <input type="color" class="form-control" id="turkeyColorPicker" required>
-                            <input type="hidden" id="turkeyColor" name="color">
-                        </div>
-                        <button type="submit" class="btn btn-primary">Save</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Edit Modal -->
-    <div class="modal fade" id="editTurkeyModal" tabindex="-1" aria-labelledby="editTurkeyModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="editTurkeyModalLabel">Edit Turkey</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <form id="editTurkeyForm">
-                        <input type="hidden" id="editTurkeyId" name="id">
-                        <div class="form-group">
-                            <label for="editTurkeyName">Name</label>
-                            <input type="text" class="form-control" id="editTurkeyName" name="name" maxlength="50" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="editTurkeyWeight">Weight</label>
-                            <input type="number" class="form-control" id="editTurkeyWeight" name="weight" step="0.01" max="999.99" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="editTurkeyAge">Age</label>
-                            <input type="number" class="form-control" id="editTurkeyAge" name="age" max="999" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="editTurkeyStatus">Status</label>
-                            <select class="form-control" id="editTurkeyStatus" name="status" required>
-                                <option value="">Select the turkey status!</option>
-                                <option value="alive">Alive</option>
-                                <option value="cooked">Cooked</option>
-                                <option value="frozen">Frozen</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="editTurkeyColor">Color</label>
-                            <input type="color" class="form-control" id="editTurkeyColorPicker" required>
-                            <input type="hidden" id="editTurkeyColor" name="color">
+                            <input type="hidden" id="turkeyColor" name="turkeyColor">
                         </div>
                         <button type="submit" class="btn btn-primary">Save</button>
                     </form>
@@ -140,80 +95,27 @@
 
             $('#turkeyColorPicker').change(function() {
                 var color = $(this).val();
-                $('#turkeyColor').val(color);
+                var colorName = getColorName(color);
+                $('#turkeyColor').val(colorName);
             });
 
-            $('#createTurkeyForm').submit(function(event) {
+            $('#turkeyForm').submit(function(event) {
                 event.preventDefault();
-
-                var color = $('#turkeyColorPicker').val();
-                $('#turkeyColor').val(color);
-
-                const formData = new FormData(this);
-                const data = {
-                    name: formData.get('name'),
-                    weight: formData.get('weight'),
-                    age: formData.get('age'),
-                    status: formData.get('status'),
-                    color: formData.get('color')
-                };
-                fetch('api.php?action=createTurkey', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(data)
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert('Turkey created successfully');
-                        location.reload();
-                    } else {
-                        alert('Error creating turkey');
-                    }
-                });
+                
+                alert('Turkey added successfully!');
                 $('#turkeyModal').modal('hide');
             });
 
-            $('#editTurkeyColorPicker').change(function() {
-                var color = $(this).val();
-                $('#editTurkeyColor').val(color);
-            });
-
-            $('#editTurkeyForm').submit(function(event) {
-                event.preventDefault();
-
-                var color = $('#editTurkeyColorPicker').val();
-                $('#editTurkeyColor').val(color);
-
-                const formData = new FormData(this);
-                const data = {
-                    id: formData.get('id'),
-                    name: formData.get('name'),
-                    weight: formData.get('weight'),
-                    age: formData.get('age'),
-                    status: formData.get('status'),
-                    color: formData.get('color')
-                };
-                fetch('api.php?action=editTurkey', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(data)
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert('Turkey updated successfully');
-                        location.reload();
-                    } else {
-                        alert('Error updating turkey');
-                    }
-                });
-                $('#editTurkeyModal').modal('hide');
-            });
+            function getColorName(color) {
+                switch(color) {
+                    case '#ff0000': return 'Red';
+                    case '#00ff00': return 'Green';
+                    case '#0000ff': return 'Blue';
+                    case '#ffff00': return 'Yellow';
+                    case '#ff00ff': return 'Magenta';
+                    default: return 'Unknown';
+                }
+            }
 
             // Fetch all turkeys
             $.ajax({
@@ -225,7 +127,7 @@
                     } else {
                         var turkeyTableBody = $('#turkeyTableBody');
                         data.forEach(function(turkey, index) {
-                            var row = '<tr data-id="' + turkey.id + '">' +
+                            var row = '<tr>' +
                                 '<th scope="row">' + (index + 1) + '</th>' +
                                 '<td>' + turkey.name + '</td>' +
                                 '<td>' + turkey.weight + '</td>' +
@@ -233,46 +135,15 @@
                                 '<td>' + turkey.status + '</td>' +
                                 '<td><div style="width: 20px; height: 20px; background-color: ' + turkey.color + ';"></div></td>' +
                                 '<td>' + turkey.created_at + '</td>' +
+                                '<td style="background-color: ' + turkey.color + '; text-align: center;"><img src="assets/images/' + turkey.status + '.webp" alt="' + turkey.status + '" style="width: 50px; height: 50px;"></td>' +
                                 '</tr>';
                             turkeyTableBody.append(row);
-                        });
-
-                        $('#turkeyTableBody tr').click(function() {
-                            var id = $(this).data('id');
-                            fetch('api.php?action=getTurkeyById&id=' + id)
-                            .then(response => response.json())
-                            .then(turkey => {
-                                if (turkey) {
-                                    $('#editTurkeyId').val(turkey.id);
-                                    $('#editTurkeyName').val(turkey.name);
-                                    $('#editTurkeyWeight').val(turkey.weight);
-                                    $('#editTurkeyAge').val(turkey.age);
-                                    $('#editTurkeyStatus').val(turkey.status);
-                                    $('#editTurkeyColorPicker').val(turkey.color);
-                                    $('#editTurkeyColor').val(turkey.color);
-                                    $('#editTurkeyModal').modal('show');
-                                } else {
-                                    alert('Error fetching turkey information');
-                                }
-                            });
                         });
                     }
                 },
                 error: function() {
                     $('#warning').removeClass('d-none');
                 }
-            });
-
-            // Search functionality
-            $('#searchInput').on('keyup', function() {
-                var value = $(this).val().toLowerCase();
-                $('#turkeyTableBody tr').filter(function() {
-                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
-                });
-            });
-
-            $('#exportCSV').click(function() {
-                window.location.href = 'api.php?action=exportToCSV';
             });
         });
     </script>
