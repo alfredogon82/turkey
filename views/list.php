@@ -236,15 +236,18 @@
 
                         $('#turkeyTableBody tr').click(function() {
                             var id = $(this).data('id');
-                            var turkey = data.find(t => t.id == id);
-                            $('#editTurkeyId').val(turkey.id);
-                            $('#editTurkeyName').val(turkey.name);
-                            $('#editTurkeyWeight').val(turkey.weight);
-                            $('#editTurkeyAge').val(turkey.age);
-                            $('#editTurkeyStatus').val(turkey.status);
-                            $('#editTurkeyColorPicker').val(turkey.color);
-                            $('#editTurkeyColor').val(turkey.color);
-                            $('#editTurkeyModal').modal('show');
+                            fetch('api.php?action=getTurkeyById&id=' + id)
+                            .then(response => response.json())
+                            .then(turkey => {
+                                $('#editTurkeyId').val(turkey.id);
+                                $('#editTurkeyName').val(turkey.name);
+                                $('#editTurkeyWeight').val(turkey.weight);
+                                $('#editTurkeyAge').val(turkey.age);
+                                $('#editTurkeyStatus').val(turkey.status);
+                                $('#editTurkeyColorPicker').val(turkey.color);
+                                $('#editTurkeyColor').val(turkey.color);
+                                $('#editTurkeyModal').modal('show');
+                            });
                         });
                     }
                 },

@@ -30,5 +30,12 @@ class Turkey
         $result = $stmt->execute([$name, $weight, $age, $status, $color, $id]);
         return $result;
     }
+
+    public function getTurkeyById($id)
+    {
+        $stmt = $this->conn->prepare("SELECT * FROM turkeys WHERE id = ?");
+        $stmt->execute([$id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
 }
 ?>

@@ -15,6 +15,9 @@ switch ($action) {
     case 'editTurkey':
         editTurkey();
         break;
+    case 'getTurkeyById':
+        getTurkeyById();
+        break;
     default:
         echo json_encode(['error' => 'Invalid action']);
         break;
@@ -45,6 +48,17 @@ function editTurkey() {
         echo json_encode(['success' => $result]);
     } else {
         echo json_encode(['error' => 'Invalid input']);
+    }
+}
+
+function getTurkeyById() {
+    $id = $_GET['id'] ?? null;
+    if ($id) {
+        $turkey = new Turkey();
+        $result = $turkey->getTurkeyById($id);
+        echo json_encode($result);
+    } else {
+        echo json_encode(['error' => 'Invalid ID']);
     }
 }
 ?>
