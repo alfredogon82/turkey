@@ -80,6 +80,52 @@
         </div>
     </div>
 
+    <!-- Edit Modal -->
+    <div class="modal fade" id="editTurkeyModal" tabindex="-1" aria-labelledby="editTurkeyModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editTurkeyModalLabel">Edit Turkey</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="editTurkeyForm">
+                        <input type="hidden" id="editTurkeyId" name="id">
+                        <div class="form-group">
+                            <label for="editTurkeyName">Name</label>
+                            <input type="text" class="form-control" id="editTurkeyName" name="name" maxlength="50" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="editTurkeyWeight">Weight</label>
+                            <input type="number" class="form-control" id="editTurkeyWeight" name="weight" step="0.01" max="999.99" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="editTurkeyAge">Age</label>
+                            <input type="number" class="form-control" id="editTurkeyAge" name="age" max="999" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="editTurkeyStatus">Status</label>
+                            <select class="form-control" id="editTurkeyStatus" name="status" required>
+                                <option value="">Select the turkey status!</option>
+                                <option value="alive">Alive</option>
+                                <option value="cooked">Cooked</option>
+                                <option value="frozen">Frozen</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="editTurkeyColor">Color</label>
+                            <input type="color" class="form-control" id="editTurkeyColorPicker" required>
+                            <input type="hidden" id="editTurkeyColor" name="color">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Save</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- jQuery and Bootstrap JS -->
     <script src="assets/js/jquery-3.5.1.min.js"></script>
     <script src="assets/js/bootstrap.bundle.min.js"></script>
@@ -127,6 +173,45 @@
                 $('#turkeyModal').modal('hide');
             });
 
+            $('#editTurkeyColorPicker').change(function() {
+                var color = $(this).val();
+                $('#editTurkeyColor').val(color);
+            });
+
+            $('#editTurkeyForm').submit(function(event) {
+                event.preventDefault();
+
+                var color = $('#editTurkeyColorPicker').val();
+                $('#editTurkeyColor').val(color);
+
+                const formData = new FormData(this);
+                const data = {
+                    id: formData.get('id'),
+                    name: formData.get('name'),
+                    weight: formData.get('weight'),
+                    age: formData.get('age'),
+                    status: formData.get('status'),
+                    color: formData.get('color')
+                };
+                fetch('api.php?action=editTurkey', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Turkey updated successfully');
+                        location.reload();
+                    } else {
+                        alert('Error updating turkey');
+                    }
+                });
+                $('#editTurkeyModal').modal('hide');
+            });
+
             // Fetch all turkeys
             $.ajax({
                 url: 'api.php?action=getAllTurkeys',
@@ -137,7 +222,7 @@
                     } else {
                         var turkeyTableBody = $('#turkeyTableBody');
                         data.forEach(function(turkey, index) {
-                            var row = '<tr>' +
+                            var row = '<tr data-id="' + turkey.id + '">' +
                                 '<th scope="row">' + (index + 1) + '</th>' +
                                 '<td>' + turkey.name + '</td>' +
                                 '<td>' + turkey.weight + '</td>' +
@@ -147,6 +232,19 @@
                                 '<td>' + turkey.created_at + '</td>' +
                                 '</tr>';
                             turkeyTableBody.append(row);
+                        });
+
+                        $('#turkeyTableBody tr').click(function() {
+                            var id = $(this).data('id');
+                            var turkey = data.find(t => t.id == id);
+                            $('#editTurkeyId').val(turkey.id);
+                            $('#editTurkeyName').val(turkey.name);
+                            $('#editTurkeyWeight').val(turkey.weight);
+                            $('#editTurkeyAge').val(turkey.age);
+                            $('#editTurkeyStatus').val(turkey.status);
+                            $('#editTurkeyColorPicker').val(turkey.color);
+                            $('#editTurkeyColor').val(turkey.color);
+                            $('#editTurkeyModal').modal('show');
                         });
                     }
                 },
