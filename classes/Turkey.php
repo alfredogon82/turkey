@@ -17,5 +17,11 @@ class Turkey
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    public function createTurkey($name, $weight, $age, $status, $color)
+    {
+        $stmt = $this->conn->prepare("INSERT INTO turkeys (name, weight, age, status, color, created_at) VALUES (?, ?, ?, ?, ?, NOW())");
+        return $stmt->execute([$name, $weight, $age, $status, $color]);
+    }
 }
 ?>

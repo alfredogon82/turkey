@@ -46,22 +46,22 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <form id="turkeyForm">
+                    <form id="createTurkeyForm">
                         <div class="form-group">
                             <label for="turkeyName">Name</label>
-                            <input type="text" class="form-control" id="turkeyName" maxlength="50" required>
+                            <input type="text" class="form-control" id="turkeyName" name="name" maxlength="50" required>
                         </div>
                         <div class="form-group">
                             <label for="turkeyWeight">Weight</label>
-                            <input type="number" class="form-control" id="turkeyWeight" step="0.01" max="999.99" required>
+                            <input type="number" class="form-control" id="turkeyWeight" name="weight" step="0.01" max="999.99" required>
                         </div>
                         <div class="form-group">
                             <label for="turkeyAge">Age</label>
-                            <input type="number" class="form-control" id="turkeyAge" max="999" required>
+                            <input type="number" class="form-control" id="turkeyAge" name="age" max="999" required>
                         </div>
                         <div class="form-group">
                             <label for="turkeyStatus">Status</label>
-                            <select class="form-control" id="turkeyStatus" required>
+                            <select class="form-control" id="turkeyStatus" name="status" required>
                             <option value="">Select the turkey status!</option>    
                             <option value="alive">Alive</option>
                                 <option value="cooked">Cooked</option>
@@ -71,7 +71,7 @@
                         <div class="form-group">
                             <label for="turkeyColor">Color</label>
                             <input type="color" class="form-control" id="turkeyColorPicker" required>
-                            <input type="hidden" id="turkeyColor" name="turkeyColor">
+                            <input type="hidden" id="turkeyColor" name="color">
                         </div>
                         <button type="submit" class="btn btn-primary">Save</button>
                     </form>
@@ -91,27 +91,41 @@
 
             $('#turkeyColorPicker').change(function() {
                 var color = $(this).val();
-                var colorName = getColorName(color);
-                $('#turkeyColor').val(colorName);
+                $('#turkeyColor').val(color);
             });
 
-            $('#turkeyForm').submit(function(event) {
+            $('#createTurkeyForm').submit(function(event) {
                 event.preventDefault();
-                
-                alert('Turkey added successfully!');
+
+                var color = $('#turkeyColorPicker').val();
+                $('#turkeyColor').val(color);
+
+                const formData = new FormData(this);
+                const data = {
+                    name: formData.get('name'),
+                    weight: formData.get('weight'),
+                    age: formData.get('age'),
+                    status: formData.get('status'),
+                    color: formData.get('color')
+                };
+                fetch('api.php?action=createTurkey', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Turkey created successfully');
+                        location.reload();
+                    } else {
+                        alert('Error creating turkey');
+                    }
+                });
                 $('#turkeyModal').modal('hide');
             });
-
-            function getColorName(color) {
-                switch(color) {
-                    case '#ff0000': return 'Red';
-                    case '#00ff00': return 'Green';
-                    case '#0000ff': return 'Blue';
-                    case '#ffff00': return 'Yellow';
-                    case '#ff00ff': return 'Magenta';
-                    default: return 'Unknown';
-                }
-            }
 
             // Fetch all turkeys
             $.ajax({
@@ -129,7 +143,7 @@
                                 '<td>' + turkey.weight + '</td>' +
                                 '<td>' + turkey.age + '</td>' +
                                 '<td>' + turkey.status + '</td>' +
-                                '<td>' + turkey.color + '</td>' +
+                                '<td><div style="width: 20px; height: 20px; background-color: ' + turkey.color + ';"></div></td>' +
                                 '<td>' + turkey.created_at + '</td>' +
                                 '</tr>';
                             turkeyTableBody.append(row);
